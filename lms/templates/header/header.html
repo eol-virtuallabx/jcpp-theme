@@ -1,0 +1,318 @@
+## mako
+
+<%page expression_filter="h" args="online_help_token, use_cookie_banner=False"/>
+
+<%namespace name='static' file='../static_content.html'/>
+<%namespace file='../main.html' import="login_query"/>
+<%!
+from django.urls import reverse
+from django.utils.translation import ugettext as _
+import waffle
+
+from lms.djangoapps.ccx.overrides import get_current_ccx
+from openedx.core.djangolib.markup import HTML, Text
+
+# App that handles subdomain specific branding
+from lms.djangoapps.branding import api as branding_api
+from openedx.core.djangoapps.lang_pref.api import header_language_selector_is_enabled, released_languages
+from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
+
+%>
+
+## Provide a hook for themes to inject branding on top.
+<%block name="navigation_top" />
+
+<%
+  unsupported_browser_alert_versions = configuration_helpers.get_value('UNSUPPORTED_BROWSER_ALERT_VERSIONS', settings.FEATURES.get('UNSUPPORTED_BROWSER_ALERT_VERSIONS'))
+%>
+% if waffle.switch_is_active('enable_unsupported_browser_alert'):
+  <script>
+    var $buoop = {
+        notify:${unsupported_browser_alert_versions | n, decode.utf8},
+        api:5,
+        reminder:0
+    };
+    function $buo_f() {
+        var e = document.createElement("script");
+        e.src = "//browser-update.org/update.min.js";
+        document.body.appendChild(e);
+    };
+    try {document.addEventListener("DOMContentLoaded", $buo_f,false)}
+    catch(e){window.attachEvent("onload", $buo_f)}
+  </script>
+% endif
+
+<style>
+
+.jcpp-separator {
+    display: block;
+    width: 100%;
+    height: 10px;
+}
+
+img.jcpp-header {
+    min-width: 100%;
+    max-width: 100%;
+    height: auto;
+}
+
+.navbar-brand img {
+    max-height: 80px;
+}
+
+.navbar-toggler, .navbar-toggler:hover {
+    background: none !important;
+    box-shadow: none !important;
+}
+
+.navbar-toggler:hover {
+    border-color: black;
+}
+
+
+.navbar .nav-item .nav-link {
+border-bottom: .25rem solid transparent;
+}
+
+.navbar .nav-item .nav-link.active {
+color: #000000c2;
+}
+
+.navbar .nav-item .nav-link:not(.btn):hover, .navbar .nav-item .nav-link:not(.btn):focus {
+border-color: rgba(0, 0, 0, .55) !important;
+color: #000000c2;
+text-decoration: none;
+}
+
+.navbar .nav-item button.btn {
+box-shadow: none !important;
+color: #ffff;
+background: none;
+background-color: #069bdc;
+border-color: #069bdc;
+text-shadow: none;
+}
+
+.navbar .nav-item button.btn:hover {
+background-color: #048dc9;
+border-color: #048dc9;
+}
+
+/* FOOTER */
+footer#jcpp-footer a img {
+    filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0\'/></filter></svg>#grayscale");
+    /* Firefox 3.5+ */
+    filter: gray;
+    /* IE6-9 */
+    -webkit-filter: grayscale(100%);
+    /* Chrome 19+ & Safari 6+ */
+}
+
+footer#jcpp-footer a img:hover {
+    filter: none;
+    -webkit-filter: grayscale(0%);
+}
+/* Courses List */
+
+.courses-list {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+.courses-list .card {
+    background-size: 100%;
+    /* background-position: center; */
+    background-repeat: no-repeat;
+    min-height: 300px;
+    max-height: 300px;
+    border: none;
+}
+
+.courses-list .card.inactive {
+    filter: grayscale(90%);
+}
+
+.courses-list .card .card-body {
+    min-height: 0px;
+    padding: 0px;
+}
+
+.courses-list .card .card-footer {
+    background-color: #ffff;
+    color: #1562ad;
+    /* opacity: 0.9; */
+    line-height: 1.2;
+    font-size: 0.8em;
+    height: 100px;
+    overflow: hidden;
+}
+
+.courses-list .card .card-footer .course-name {
+    font-size: 1.2em;
+}
+
+.courses-list .card .card-date {
+    background-color: #73425f;
+    padding: 0 1.25rem;
+    color: #ffff;
+    font-size: 0.8em;
+    height: 20px;
+}
+
+.courses-list .card:not(:hover) .card-desc, .courses-list .card:not(:hover) .card-desc p, .courses-list .card:not(:hover) .card-desc .card-button {
+    height: 0px;
+    opacity: 0;
+    padding: 0;
+}
+
+.courses-list .card:not(:hover) .card-desc .card-button .btn {
+    display: none;
+}
+
+.courses-list .card .card-desc {
+    background-color: #ffff;
+    color: #1562ad;
+    /* opacity: 0.9; */
+    padding: .75rem 1.25rem;
+}
+
+.courses-list .card .card-desc p {
+    height: 100px;
+    font-size: 0.8em;
+    overflow: hidden;
+    text-overflow: -o-ellipsis-lastline;
+}
+
+.courses-list .card .card-desc .card-button {
+    max-height: 80px;
+}
+
+.courses-list .card:hover .card-desc {
+    height: 180px;
+    transition: height .2s;
+}
+
+.courses-list .card:hover .card-desc p, .courses-list .card:hover .card-desc .card-button {
+    transition: opacity 0.7s;
+}
+
+.courses-list .card .card-desc .card-button button.btn {
+    background-color: #73425f !important;
+    color: #FFFF !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+.courses-list .card .card-desc .card-button button.btn:hover {
+    background-color: #572f47 !important;
+}
+
+/* Certificate Validation */
+
+
+#certificate_validation .card, #certificate_validation input {
+    border: none;
+}
+
+ #certificate_validation input {
+    background-color: #00000011;
+}
+
+#certificate_validation .btn {
+    box-shadow: none !important;
+    color: #ffff;
+    background: none;
+    background-color: #069bdc;
+    border-color: #069bdc;
+    text-shadow: none;
+}
+
+#certificate_validation .btn:hover {
+    background-color: #048dc9;
+    border-color: #048dc9;
+}
+
+/* ABOUT */
+
+#about_us h1 {
+    color: #069bdc;
+}
+
+#about_us div.about-content {
+    column-count: 2;
+    text-align: justify;
+    text-justify: inter-word;
+    overflow-wrap: break-word;
+    hyphens: manual;
+}
+
+@media (max-width: 850px) {
+    #about_us div.about-content {
+        column-count: 1;
+    }
+}
+
+</style>
+
+<img class="jcpp-separator" src="${static.url('jcpp-theme/images/barra_top.png')}" alt="">
+<nav class="navbar navbar-expand-lg navbar-light px-3" >
+    <div class="container-fluid">
+        % if use_cookie_banner:
+            ${static.renderReact(
+                component="CookiePolicyBanner",
+                id="frontend-component-cookie-policy-banner",
+                props={}
+            )}
+        % endif
+        <%include file="navbar-logo-header.html" args="online_help_token=online_help_token"/>
+        <button class="navbar-toggler ml-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        % if user.is_authenticated:
+            <%include file="navbar-authenticated.html" args="online_help_token=online_help_token"/>
+        % else:
+            <%include file="navbar-not-authenticated.html" args="online_help_token=online_help_token"/>
+        % endif
+    </div>
+</nav>
+
+% if course:
+<!--[if lte IE 9]>
+<div class="ie-banner" aria-hidden="true">${Text(_('{begin_strong}Warning:{end_strong} Your browser is not fully supported. We strongly recommend using {chrome_link} or {ff_link}.')).format(
+    begin_strong=HTML('<strong>'),
+    end_strong=HTML('</strong>'),
+    chrome_link=HTML('<a href="https://www.google.com/chrome" rel="noopener" target="_blank">Chrome</a>'),
+    ff_link=HTML('<a href="http://www.mozilla.org/firefox" rel="noopener" target="_blank">Firefox</a>'),
+)}</div>
+<![endif]-->
+% endif
+
+% if settings.FEATURES.get('ENABLE_COOKIE_CONSENT', False):
+  <%include file="../widgets/cookie-consent.html" />
+% endif
+
+% if header_language_selector_is_enabled():
+    <% languages = released_languages() %>
+    % if len(languages) > 1:
+        <form action="/i18n/setlang/" method="post" class="settings-language-form" id="language-settings-form">
+            <input type="hidden" id="csrf_token" name="csrfmiddlewaretoken" value="${csrf_token}">
+            % if user.is_authenticated:
+                <input title="preference api" type="hidden" class="url-endpoint" value="${reverse('preferences_api', kwargs={'username': user.username})}" data-user-is-authenticated="true">
+            % else:
+                <input title="session update url" type="hidden" class="url-endpoint" value="${reverse('session_language')}" data-user-is-authenticated="false">
+            % endif
+            <label><span class="sr">${_("Choose Language")}</span>
+            <select class="input select language-selector" id="settings-language-value" name="language">
+                % for language in languages:
+                    % if language[0] == LANGUAGE_CODE:
+                        <option value="${language[0]}" selected="selected">${language[1]}</option>
+                    % else:
+                        <option value="${language[0]}" >${language[1]}</option>
+                    % endif
+                % endfor
+            </select>
+            </label>
+        </form>
+    % endif
+% endif

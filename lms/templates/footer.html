@@ -1,0 +1,58 @@
+## mako
+<%page expression_filter="h"/>
+<%!
+  from django.urls import reverse
+  from django.utils.translation import ugettext as _
+  from lms.djangoapps.branding.api import get_footer
+  from openedx.core.djangoapps.lang_pref.api import footer_language_selector_is_enabled
+%>
+<% footer = get_footer(is_secure=is_secure) %>
+<% icp_license_info = getattr(settings, 'ICP_LICENSE_INFO', {})%>
+<%namespace name='static' file='static_content.html'/>
+
+<footer id="jcpp-footer" class="mt-auto text-center mx-auto py-4" >
+  <div class="container border-0 px-5 text-center">
+    <a href="#" class="text-decoration-none">
+      <img src="${static.url('jcpp-theme/images/logos/JICA.png')}" class="img-fluid my-auto py-1 px-3" alt="JICA" style="max-height: 160px;">
+    </a>
+    <a href="#" class="text-decoration-none">
+      <img src="${static.url('jcpp-theme/images/logos/JCPP2030.png')}" class="img-fluid my-auto py-1 px-3" alt="JCPP" style="max-height: 160px;">
+    </a>
+    <a href="#" class="text-decoration-none">
+      <img src="${static.url('jcpp-theme/images/logos/AGCID.png')}" class="img-fluid my-auto py-1 px-3" alt="JICA" style="max-height: 160px;">
+    </a>
+  </div>
+  <p class="text-center">
+    <small class="text-muted">
+      ${footer['copyright']}
+      </br>
+      <a href="https://www.uchile.cl/portal/informacion-general/174996/politica-de-privacidad-de-la-informacion-y-datos-personales" target="_blank">${_('Privacy Policy')}</a>
+      % if icp_license_info.get('icp_license'):
+        ${u" | {text}".format(text=icp_license_info.get('text'))}
+        <a href="${icp_license_info.get('icp_license_link', '#')}">
+            ${u" {icp}".format(icp=icp_license_info.get('icp_license'))}
+        </a>
+      % endif
+    </small>
+  </p>
+  <p class="text-right">
+    <img src="${static.url('jcpp-theme/images/logos/logos_footer.png')}" alt="FCFM Y EOL" class="img-fluid" style="max-height: 40px;">
+  </p>
+</footer>
+
+% if context.get('include_language_selector', footer_language_selector_is_enabled()):
+    <%include file="${static.get_template_path('widgets/footer-language-selector.html')}"/>
+% endif
+<img class="jcpp-separator" src="${static.url('jcpp-theme/images/barra_bottom.png')}" alt="">
+
+% if include_dependencies:
+  <%static:js group='base_vendor'/>
+  <%static:css group='style-vendor'/>
+  <%include file="widgets/segment-io.html" />
+  <%include file="widgets/segment-io-footer.html" />
+% endif
+% if footer_css_urls:
+  % for url in footer_css_urls:
+    <link rel="stylesheet" type="text/css" href="${url}"></link>
+  % endfor
+% endif
