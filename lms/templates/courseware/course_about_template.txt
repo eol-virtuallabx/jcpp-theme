@@ -1,0 +1,44 @@
+<div class="row menu-sticky">
+    <div class="menu text-center w-100 mt-2 mb-4 py-3 px-4 rounded h3">
+        <a href="#about" class="mr-4">Descripción del curso</a> | <a href="#temario" class="mr-4 ml-4">Qué
+            aprenderás</a>
+    </div>
+</div>
+<div class="row about-details">
+    <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
+        magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+        consequat.
+    </p>
+    <p class="mt-2">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
+        magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+        consequat.
+    </p>
+    <h1 id="temario">Qué aprenderás</h1>
+    <div class="course-content">
+        <h2>Módulo 1</h2>
+        <ol>
+            <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod</li>
+            <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod</li>
+        </ol>
+
+        <h2>Módulo 2</h2>
+        <ol>
+            <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod</li>
+            <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod</li>
+        </ol>
+
+        <h2>Módulo 3</h2>
+        <ol>
+            <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod</li>
+            <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod</li>
+        </ol>
+
+        <h2>Módulo 4</h2>
+        <ol>
+            <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod</li>
+            <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod</li>
+        </ol>
+    </div>
+</div>

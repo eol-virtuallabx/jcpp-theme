@@ -1,0 +1,190 @@
+
+<%page expression_filter="h"/>
+<%namespace name='static' file='../static_content.html'/>
+<%!
+from django.utils.translation import ugettext as _
+from django.utils.translation import pgettext
+from django.urls import reverse
+from lms.djangoapps.courseware.courses import get_course_about_section
+from django.conf import settings
+from six import text_type
+from common.djangoapps.edxmako.shortcuts import marketing_link
+from openedx.core.djangolib.js_utils import js_escaped_string
+from openedx.core.djangolib.markup import clean_dangerous_html, HTML, Text
+from openedx.core.lib.courses import course_image_url
+
+from six import string_types
+%>
+
+<%inherit file="../main.html" />
+<%block name="headextra">
+  ## OG (Open Graph) title and description added below to give social media info to display
+  ## (https://developers.facebook.com/docs/opengraph/howtos/maximizing-distribution-media-content#tags)
+  <meta property="og:title" content="${course.display_name_with_default}" />
+  <meta property="og:description" content="${get_course_about_section(request, course, 'short_description')}" />
+</%block>
+
+<%block name="js_extra">
+  <script type="text/javascript">
+  (function() {
+    $(".register").click(function(event) {
+      $("#class_enroll_form").submit();
+      event.preventDefault();
+    });
+
+    $('#class_enroll_form').on('ajax:complete', function(event, xhr) {
+      if (xhr.status == 200) {
+        if (xhr.responseText == "") {
+          location.href = "${reverse('dashboard') | n, js_escaped_string}";
+        }
+        else {
+          location.href = xhr.responseText;
+        }
+      } else if (xhr.status == 403) {
+        $('#register_error').text(
+            (xhr.responseText ? xhr.responseText : "${_("An error has occurred. Please ensure that you are logged in to enroll.") | n, js_escaped_string}")
+        ).css("display", "block");
+      } else {
+        $('#register_error').text(
+            (xhr.responseText ? xhr.responseText : "${_("An error occurred. Please try again later.") | n, js_escaped_string}")
+        ).css("display", "block");
+      }
+    });
+
+  })(this)
+  </script>
+
+  <script src="${static.url('js/course_info.js')}"></script>
+</%block>
+
+<%block name="pagetitle">${course.display_name_with_default}</%block>
+
+<section class="course-info">
+  <div class="container px-4 pb-0">
+    <div class="row">
+      <div class="col-md-7 course-header py-2">
+          <h1 class="text-left mb-0 pb-2">
+            ${course.display_name_with_default}
+          </h1>
+          <h3 class="text-muted">
+            ${course.display_org_with_default}
+          </h3>
+          %if user.is_authenticated and registered:
+            %if show_courseware_link:
+              <p class="font-italic lead enroll-message">${_("You are enrolled in this course")}</p>
+              <a href="${course_target}" class="pt-2 enroll-button-2">
+                <button class="btn">${_("View Course")}</button>
+              </a>
+            %else:
+              <button class="btn my-auto pt-2 enroll-button" disabled>${_("You are enrolled in this course")}</button>
+            %endif
+          % elif is_course_full:
+            <button class="btn my-auto pt-2 enroll-button" disabled>${_("Course is full")}</button>
+          % elif invitation_only and not can_enroll:
+            <button class="btn my-auto pt-2 enroll-button" disabled>${_("Enrollment in this course is by invitation only")}</button>
+          % elif not is_shib_course and not can_enroll:
+            <button class="btn my-auto pt-2 enroll-button" disabled>${_("Enrollment is Closed")}</button>
+          %elif allow_anonymous:
+            %if show_courseware_link:
+              <a href="${course_target}" class="my-auto pt-2">
+                <button class="btn">${_("View Course")}</button>
+              </a>
+            %endif
+          %else:
+            <%
+              if ecommerce_checkout:
+                reg_href = ecommerce_checkout_link
+              else:
+                reg_href="#"
+              if single_paid_mode:
+                href_class = "add-to-cart"
+              else:
+                href_class = "register"
+            %>
+            <a href="${reg_href}" class="${href_class} my-auto pt-2">
+              <button class="btn">${_("Enroll Now")}</button>
+            </a>
+            <div id="register_error"></div>
+          %endif
+          <%
+            course_start_date = 'None'
+            if not course.start_date_is_still_default:
+                course_start_date = course.advertised_start or course.start
+                if not isinstance(course_start_date, string_types):
+                    course_start_date = course_start_date.strftime('%Y-%m-%dT%H:%M:%S%z')
+                endif
+            endif
+            course_end_date = 'None'
+            if course.end:
+                course_end_date = course.end
+                if not isinstance(course_end_date, string_types):
+                    course_end_date = course_end_date.strftime('%Y-%m-%dT%H:%M:%S%z')
+                endif
+            endif
+           %>
+          % if course_start_date != "None":
+          <p class="text-muted mt-3">
+            <strong>${_("Fecha inicio: ")}</strong>
+            <span class="important-dates-item-text start-date localized_datetime" data-format="shortDate" data-datetime="${course_start_date}" data-language="${LANGUAGE_CODE}"></span>
+          </p>
+          % endif
+          % if course.end and course_end_date != "None":
+          <p class="text-muted">
+            <strong>${_("Fecha término: ")}</strong>
+            <span class="important-dates-item-text start-date localized_datetime" data-format="shortDate" data-datetime="${course_end_date}" data-language="${LANGUAGE_CODE}"></span>
+          </p>
+          % endif
+      </div>
+      <div class="col-md-5 py-2">
+        % if get_course_about_section(request, course, "video"):
+          <a href="#video-modal" class="media" rel="leanModal">
+            <div class="hero">
+              <img src="${course_image_urls['large']}" class="img-fluid course-about-image" alt="image"/>
+              <div class="play-intro"></div>
+            </div>
+          </a>
+        %else:
+          <img src="${course_image_urls['large']}" class="img-fluid course-about-image shadow-sm" alt="image" />
+        % endif
+      </div>
+    </div>
+    % if staff_access and studio_url is not None:
+      <div class="row">
+        <div class="wrap-instructor-info studio-view my-auto">
+          <a class="instructor-info-action" href="${studio_url}">${_("View About Page in studio")}</a>
+        </div>
+      </div>
+    % endif  
+
+  </div>
+  <div class="container pb-0" id="about">
+    <%block name="course_about_details">
+    ${clean_dangerous_html(get_course_about_section(request, course, "overview"))}
+    </%block>
+
+  </div>
+</section>
+
+## Need to put this hidden form on the page so that the registration button works.
+## Since it's no harm to display a hidden form, we display it with the most permissive conditional
+## which is when the student is not registered.
+%if active_reg_button or is_shib_course:
+  <div style="display: none;">
+    <form id="class_enroll_form" method="post" data-remote="true" action="${reverse('change_enrollment')}">
+      <fieldset class="enroll_fieldset">
+        <legend class="sr">${pgettext("self","Enroll")}</legend>
+        <input name="course_id" type="hidden" value="${course.id}">
+        <input name="enrollment_action" type="hidden" value="enroll">
+      </fieldset>
+      <div class="submit">
+        <input name="submit" type="submit" value="${pgettext('self','enroll')}">
+      </div>
+    </form>
+  </div>
+%endif
+
+<%include file="../video_modal.html" />
+
+<%static:require_module_async module_name="js/dateutil_factory" class_name="DateUtilFactory">
+    DateUtilFactory.transform(iterationKey=".localized_datetime");
+</%static:require_module_async>
