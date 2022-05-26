@@ -1,5 +1,5 @@
 define([
-    'jquery', 'gettext', 'js/models/settings/advanced', 'norteamericano-theme/js/views/settings/advanced'
+    'jquery', 'gettext', 'js/models/settings/advanced', 'jcpp-theme/js/views/settings/advanced'
 ], function($, gettext, AdvancedSettingsModel, AdvancedSettingsView) {
     'use strict';
     return function(advancedDict, advancedSettingsUrl, publisherEnabled) {
