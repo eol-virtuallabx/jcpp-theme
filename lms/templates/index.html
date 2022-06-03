@@ -7,10 +7,38 @@ from django.urls import reverse
 
 from openedx.core.djangolib.markup import HTML, Text
 %>
-
+<style>
+  /* (1366x768) WXGA Display */
+  @media  screen and (min-width: 1366px) {
+    .courses-list .card {
+        min-height: 376px !important;
+    }
+    .container.px-3{
+      max-width: 1347px !important;
+    }
+  }
+  /* (1920x1080) Full HD Display */
+  @media  screen and (min-width: 1920px) {
+    .courses-list .card {
+        min-height: 479px !important;
+    }
+    .container.px-3{
+      max-width: 1894px !important;
+    }
+  }
+  /* 2K Display */
+  @media  screen and (min-width: 2560px) {
+    .courses-list .card {
+        min-height: 489px !important;
+    }
+    .container.px-3{
+      max-width: 1948px !important;
+    }
+  }
+</style>
 <section class="container-fluid px-0" id="main">
-  <img src="${static.url('jcpp-theme/images/banner_jccp_home.jpeg')}" alt="About Us" class="mx-auto jcpp-header d-block">
-  <div class="container px-3">
+  <img src="${static.url('jcpp-theme/images/banner_jccp_home.jpg')}" alt="About Us" class="mx-auto jcpp-header d-block">
+  <div class="container px-3" style="max-width: 1180px">
     <%include file="${courses_list}" />
   </div>
 </section>
