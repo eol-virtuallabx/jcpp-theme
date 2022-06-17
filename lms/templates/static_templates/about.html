@@ -5,9 +5,12 @@
 
 <%block name="pagetitle">${_("Quiénes somos")}</%block>
 <section class="container-fluid px-0" id="about_us">
-    <img src="${static.url('jcpp-theme/images/banner_nosotros.jpg')}" alt="About Us" class="mx-auto jcpp-header d-block">
-    <div class="container px-3">
-        <h1 class="text-left mt-2">
+    <video playsinline autoplay muted loop  class="header-video" style="width: 100%;object-fit: contain;">
+		<source src="${static.url('jcpp-theme/images/quienes_somos.mp4')}" type="video/mp4">
+	</video>
+    <div class="container px-3" style="padding-top:20px;">
+        <h1 class="text-left" style="font-size: 3em;margin-bottom: 15px;">Sobre Nosotros</h1>
+        <h1 class="text-left" style="margin-bottom: 15px;">
             ${_('Japan Chile Partnership Programme 2030, JCPP2030')}
         </h1>
         <div class="about-content">
